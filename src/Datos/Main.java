@@ -15,7 +15,7 @@ public class Main {
     }
 
     public static void crearMenu() {
-        JFrame frame = new JFrame("🚛 Sistema Logístico ");
+        JFrame frame = new JFrame("🚛 Sistema Logístico .n");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500, 400);
         frame.setLocationRelativeTo(null);
@@ -38,7 +38,7 @@ public class Main {
         btn4.addActionListener(e -> cambiarClima());
         btn5.addActionListener(e -> grafo.imprimirMatriz());
         btn6.addActionListener(e -> {
-            JOptionPane.showMessageDialog(null, "💖 Gracias por usar el sistema¡Hasta pronto!");
+            JOptionPane.showMessageDialog(null, "💖 Gracias por usar el sistema. ¡Hasta pronto!");
             System.exit(0);
         });
 
