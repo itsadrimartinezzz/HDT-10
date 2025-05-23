@@ -66,8 +66,35 @@ public class Grafo {
     // Agrega una ciudad nueva si no existe
     public void agregarCiudad(String nombre) {
         if (!ciudadIndices.containsKey(nombre)) {
-            ciudadIndices.put(nombre, ciudades.size());
+            int newIndex = ciudades.size();
+            ciudadIndices.put(nombre, newIndex);
             ciudades.add(new Ciudad(nombre));
+            // Rehace la matriz para agregar la nueva ciudad
+            int n = ciudades.size();
+            int[][][] newMatrizPesos = new int[4][n][n];
+            int[][] newDistancias = new int[n][n];
+            int[][] newRutas = new int[n][n];
+            for (int c = 0; c < 4; c++) {
+                for (int i = 0; i < n - 1; i++)
+                    System.arraycopy(matrizPesos[c][i], 0, newMatrizPesos[c][i], 0, n - 1);
+                Arrays.fill(newMatrizPesos[c][n - 1], INF);
+                for (int j = 0; j < n; j++)
+                    newMatrizPesos[c][j][n - 1] = INF;
+            }
+            for (int i = 0; i < n - 1; i++)
+                System.arraycopy(distancias[i], 0, newDistancias[i], 0, n - 1);
+            Arrays.fill(newDistancias[n - 1], INF);
+            for (int j = 0; j < n; j++)
+                newDistancias[j][n - 1] = INF;
+            for (int i = 0; i < n - 1; i++)
+                System.arraycopy(rutas[i], 0, newRutas[i], 0, n - 1);
+            Arrays.fill(newRutas[n - 1], -1);
+            for (int j = 0; j < n; j++)
+                newRutas[j][n - 1] = -1;
+            matrizPesos = newMatrizPesos;
+            distancias = newDistancias;
+            rutas = newRutas;
+            recalcularFloyd();
         }
     }
 
@@ -114,7 +141,8 @@ public class Grafo {
         for (int k = 0; k < n; k++)
             for (int i = 0; i < n; i++)
                 for (int j = 0; j < n; j++)
-                    if (distancias[i][k] + distancias[k][j] < distancias[i][j]) {
+                    if (distancias[i][k] != INF && distancias[k][j] != INF &&
+                        distancias[i][k] + distancias[k][j] < distancias[i][j]) {
                         distancias[i][j] = distancias[i][k] + distancias[k][j];
                         rutas[i][j] = rutas[k][j];
                     }
@@ -127,12 +155,19 @@ public class Grafo {
         if (distancias[i][j] == INF) return Collections.emptyList();
 
         LinkedList<String> camino = new LinkedList<>();
+        camino.add(ciudades.get(j).getNombre());
         while (j != i) {
-            camino.addFirst(ciudades.get(j).getNombre());
             j = rutas[i][j];
+            camino.addFirst(ciudades.get(j).getNombre());
         }
-        camino.addFirst(ciudades.get(i).getNombre());
         return camino;
+    }
+
+    // Retorna el camino mas corto entre la ciudad inicial y final
+    public int getDistancia(String origen, String destino) {
+        int i = ciudadIndices.get(origen);
+        int j = ciudadIndices.get(destino);
+        return distancias[i][j] == INF ? -1 : distancias[i][j];
     }
 
     // Calcula el centro del grafo: la ciudad con menor excentricidad
@@ -158,9 +193,12 @@ public class Grafo {
         StringBuilder html = new StringBuilder("<html>");
 
         // Explicación del contenido
+        String[] climas = {"Normal ☀️", "Lluvia 🌧️", "Nieve ❄️", "Tormenta ⛈️"};
+        String climaActual = climas[clima];
         html.append("<div style='padding:10px; font-family:Arial;'>")
             .append("<h2 style='text-align:center;'>📍 Matriz de distancias mínimas entre ciudades</h2>")
             .append("<p style='text-align:center;'>")
+            .append("🔹 <b>Clima actual: " + climaActual + "</b><br>")
             .append("🔹 Filas = <b>Ciudad origen</b>, Columnas = <b>Ciudad destino</b><br>")
             .append("🔹 Los valores indican el <b>tiempo mínimo de ruta</b> según el clima actual<br>")
             .append("🔹 <b>∞</b> significa que no existe una conexión disponible<br>")
@@ -192,5 +230,10 @@ public class Grafo {
         JScrollPane scrollPane = new JScrollPane(label);
         scrollPane.setPreferredSize(new Dimension(900, 500));
         JOptionPane.showMessageDialog(null, scrollPane, "📊 Matriz de distancias", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Getter para ciudadIndices para validar el nombre de las ciudades
+    public Map<String, Integer> getCiudadIndices() {
+        return ciudadIndices;
     }
 }
