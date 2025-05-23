@@ -67,17 +67,28 @@ public class Main {
     private static void mostrarRutaMasCorta() {
         String origen = JOptionPane.showInputDialog("🌷 Ciudad origen:");
         String destino = JOptionPane.showInputDialog("🌷 Ciudad destino:");
+        if (origen == null || destino == null || origen.isEmpty() || destino.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "🚫 Por favor, ingrese nombres de ciudades válidos.");
+            return;
+        }
+        if (!grafo.getCiudadIndices().containsKey(origen) || !grafo.getCiudadIndices().containsKey(destino)) {
+            JOptionPane.showMessageDialog(null, "🚫 Una o ambas ciudades no existen en el grafo.");
+            return;
+        }
         List<String> camino = grafo.caminoMasCorto(origen, destino);
-
         if (camino.isEmpty())
             JOptionPane.showMessageDialog(null, "🚫 No hay ruta disponible.");
         else
-            JOptionPane.showMessageDialog(null, "🦋 Ruta más corta: " + String.join(" ➡️ ", camino));
+            JOptionPane.showMessageDialog(null, "🦋 Ruta más corta: " + String.join(" ➡️ ", camino) + 
+                "\n⏱️ Tiempo total: " + grafo.getDistancia(origen, destino) + " horas");
     }
 
     // Permite al usuario agregar o eliminar conexiones entre ciudades
     private static void mostrarModificarGrafo() {
-        String[] opciones = {"❌ Eliminar conexión", "➕ Agregar conexión nueva"};
+        String[] opciones = {
+            "❌ Interrumpir tráfico (eliminar conexión)", 
+            "➕ Agregar conexión nueva"
+        };
         int seleccion = JOptionPane.showOptionDialog(null, "Elige una opción:",
                 "🔧 Modificar grafo", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                 null, opciones, opciones[0]);
@@ -86,25 +97,42 @@ public class Main {
         if (seleccion == 0) {
             String origen = JOptionPane.showInputDialog("🔹 Ciudad origen:");
             String destino = JOptionPane.showInputDialog("🔹 Ciudad destino:");
+            if (origen == null || destino == null || origen.isEmpty() || destino.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "🚫 Por favor, ingrese nombres de ciudades válidos.");
+                return;
+            }
+            if (!grafo.getCiudadIndices().containsKey(origen) || !grafo.getCiudadIndices().containsKey(destino)) {
+                JOptionPane.showMessageDialog(null, "🚫 Una o ambas ciudades no existen en el grafo.");
+                return;
+            }
             grafo.eliminarConexion(origen, destino);
-            JOptionPane.showMessageDialog(null, "🧹 Conexión eliminada.");
+            JOptionPane.showMessageDialog(null, "🧹 Tráfico interrumpido entre " + origen + " y " + destino + ".");
 
         // Si elige agregar
         } else if (seleccion == 1) {
             String origen = JOptionPane.showInputDialog("🌼 Ciudad origen:");
             String destino = JOptionPane.showInputDialog("🌼 Ciudad destino:");
-
+            if (origen == null || destino == null || origen.isEmpty() || destino.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "🚫 Por favor, ingrese nombres de ciudades válidos.");
+                return;
+            }
             int[] tiempos = new int[4];
             String[] climas = {"normal ☀️", "lluvia 🌧️", "nieve ❄️", "tormenta ⛈️"};
 
             // Solicita los tiempos para cada tipo de clima
             for (int i = 0; i < 4; i++) {
                 String input = JOptionPane.showInputDialog("⏱️ Tiempo con " + climas[i] + ":");
-                tiempos[i] = Integer.parseInt(input);
+                try {
+                    tiempos[i] = Integer.parseInt(input);
+                    if (tiempos[i] <= 0) throw new NumberFormatException("Tiempo debe ser positivo.");
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "🚫 Entrada inválida para " + climas[i] + ". Conexión no agregada.");
+                    return;
+                }
             }
-
             grafo.agregarConexion(origen, destino, tiempos);
-            JOptionPane.showMessageDialog(null, "✅ Conexión agregada.");
+            JOptionPane.showMessageDialog(null, 
+                "✅ Conexión agregada entre " + origen + " y " + destino + ". Se usará el tiempo de clima normal por defecto.");
         }
     }
 
