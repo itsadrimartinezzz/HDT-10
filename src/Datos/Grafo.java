@@ -30,6 +30,9 @@ public class Grafo {
     // Valor que representa infinito (usado para indicar que no hay conexión)
     private final int INF = Integer.MAX_VALUE / 2;
 
+    // Almacena la temperatura actual, si se establece
+    private Double temperaturaActual = null;
+
     // Carga el grafo desde un archivo de texto con el formato indicado
     public void cargarDesdeArchivo(String archivo) throws Exception {
         List<String> lineas = Files.readAllLines(Paths.get(archivo));
@@ -69,7 +72,7 @@ public class Grafo {
             int newIndex = ciudades.size();
             ciudadIndices.put(nombre, newIndex);
             ciudades.add(new Ciudad(nombre));
-            // Rehace la matriz para agregar la nueva ciudad
+            // Resize matrices to accommodate the new city
             int n = ciudades.size();
             int[][][] newMatrizPesos = new int[4][n][n];
             int[][] newDistancias = new int[n][n];
@@ -121,6 +124,22 @@ public class Grafo {
     // Cambia el clima actual y recalcula las rutas más cortas
     public void establecerClima(int clima) {
         this.clima = clima;
+        this.temperaturaActual = null; // Reset temperature when manually setting climate
+        recalcularFloyd();
+    }
+
+    // Establece el clima basado en la temperatura en grados Celsius
+    public void establecerClimaPorTemperatura(double temperatura) {
+        this.temperaturaActual = temperatura;
+        if (temperatura >= 15) {
+            this.clima = 0; // Normal
+        } else if (temperatura >= 5) {
+            this.clima = 1; // Lluvia
+        } else if (temperatura >= -5) {
+            this.clima = 2; // Nieve
+        } else {
+            this.clima = 3; // Tormenta
+        }
         recalcularFloyd();
     }
 
@@ -163,7 +182,7 @@ public class Grafo {
         return camino;
     }
 
-    // Retorna el camino mas corto entre la ciudad inicial y final
+    // Returns the shortest path distance between two cities
     public int getDistancia(String origen, String destino) {
         int i = ciudadIndices.get(origen);
         int j = ciudadIndices.get(destino);
@@ -198,7 +217,11 @@ public class Grafo {
         html.append("<div style='padding:10px; font-family:Arial;'>")
             .append("<h2 style='text-align:center;'>📍 Matriz de distancias mínimas entre ciudades</h2>")
             .append("<p style='text-align:center;'>")
-            .append("🔹 <b>Clima actual: " + climaActual + "</b><br>")
+            .append("🔹 <b>Clima actual: " + climaActual + "</b>");
+        if (temperaturaActual != null) {
+            html.append(" (Temperatura: " + temperaturaActual + "°C)");
+        }
+        html.append("<br>")
             .append("🔹 Filas = <b>Ciudad origen</b>, Columnas = <b>Ciudad destino</b><br>")
             .append("🔹 Los valores indican el <b>tiempo mínimo de ruta</b> según el clima actual<br>")
             .append("🔹 <b>∞</b> significa que no existe una conexión disponible<br>")
@@ -232,8 +255,13 @@ public class Grafo {
         JOptionPane.showMessageDialog(null, scrollPane, "📊 Matriz de distancias", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // Getter para ciudadIndices para validar el nombre de las ciudades
+    // Getter for ciudadIndices to allow validation of city names
     public Map<String, Integer> getCiudadIndices() {
         return ciudadIndices;
+    }
+
+    // Getter for ciudades (for testing)
+    public List<Ciudad> getCiudades() {
+        return ciudades;
     }
 }

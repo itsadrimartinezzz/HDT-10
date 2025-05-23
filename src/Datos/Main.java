@@ -26,7 +26,7 @@ public class Main {
         frame.setLocationRelativeTo(null); // Centra la ventana
 
         // Panel con diseño de rejilla para los botones del menú
-        JPanel panel = new JPanel(new GridLayout(7, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(8, 1, 10, 10)); // Increased to 8 for new button
         JLabel titulo = new JLabel("MENÚ PRINCIPAL", SwingConstants.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 18));
         panel.add(titulo);
@@ -35,17 +35,19 @@ public class Main {
         JButton btn1 = new JButton("1. 🚗 Camino más corto entre ciudades");
         JButton btn2 = new JButton("2. 🏙️ Ciudad centro del grafo");
         JButton btn3 = new JButton("3. 🔧 Modificar grafo");
-        JButton btn4 = new JButton("4. 🌦️ Cambiar clima actual");
-        JButton btn5 = new JButton("5. 📊 Mostrar matriz de distancias");
-        JButton btn6 = new JButton("6. ❌ Salir");
+        JButton btn4 = new JButton("4. 🌡️ Cambiar temperatura actual");
+        JButton btn5 = new JButton("5. 🌦️ Cambiar clima actual");
+        JButton btn6 = new JButton("6. 📊 Mostrar matriz de distancias");
+        JButton btn7 = new JButton("7. ❌ Salir");
 
         // Acciones al presionar cada botón
         btn1.addActionListener(e -> mostrarRutaMasCorta());
         btn2.addActionListener(e -> JOptionPane.showMessageDialog(null, "Centro del grafo: " + grafo.centroDelGrafo()));
         btn3.addActionListener(e -> mostrarModificarGrafo());
-        btn4.addActionListener(e -> cambiarClima());
-        btn5.addActionListener(e -> grafo.mostrarMatrizEnVentana());
-        btn6.addActionListener(e -> {
+        btn4.addActionListener(e -> cambiarTemperatura());
+        btn5.addActionListener(e -> cambiarClima());
+        btn6.addActionListener(e -> grafo.mostrarMatrizEnVentana());
+        btn7.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "💖 Gracias por usar el sistema ¡Hasta pronto!");
             System.exit(0);
         });
@@ -57,6 +59,7 @@ public class Main {
         panel.add(btn4);
         panel.add(btn5);
         panel.add(btn6);
+        panel.add(btn7);
 
         // Muestra la ventana principal
         frame.getContentPane().add(panel);
@@ -133,6 +136,18 @@ public class Main {
             grafo.agregarConexion(origen, destino, tiempos);
             JOptionPane.showMessageDialog(null, 
                 "✅ Conexión agregada entre " + origen + " y " + destino + ". Se usará el tiempo de clima normal por defecto.");
+        }
+    }
+
+    // Permite al usuario ingresar una temperatura para determinar el clima actual
+    private static void cambiarTemperatura() {
+        String input = JOptionPane.showInputDialog("🌡️ Ingrese la temperatura actual (°C):");
+        try {
+            double temperatura = Double.parseDouble(input);
+            grafo.establecerClimaPorTemperatura(temperatura);
+            JOptionPane.showMessageDialog(null, "✅ Clima actualizado según temperatura (" + temperatura + "°C) y rutas recalculadas.");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "🚫 Por favor, ingrese un valor numérico válido para la temperatura.");
         }
     }
 
